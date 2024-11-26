@@ -1,0 +1,29 @@
+{
+  "accounts": {
+    "account{4}": "0x617F2E2fD72FD9D5503197092aC168c91465E7f2"
+  },
+  "linkReferences": {},
+  "transactions": [
+    {
+      "timestamp": 1678667645513,
+      "record": {
+        "value": "0",
+        "inputs": "(uint8,address[],uint256[])",
+        "parameters": [
+          "6",
+          [
+            "0xcBC2bc2940358da24C78dd86B5eF8956Ad34B518"
+          ],
+          [
+            "100000000000000000000"
+          ]
+        ],
+        "name": "setOrganization",
+        "type": "function",
+        "to": "created{undefined}",
+        "from": "account{4}"
+      }
+    }
+  ],
+  "abis": {}
+}
