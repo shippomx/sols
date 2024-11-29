@@ -370,14 +370,11 @@ interface IERC20 {
 contract ERC20 is Context, IERC20 {
     using SafeMath for uint256;
 
-
     mapping (address => uint256) internal _balances;
-
     mapping (address => mapping (address => uint256)) internal _allowances;
 
     uint256 internal _totalSupply;
 
- 
 
     /**
      * @dev See {IERC20-totalSupply}.
@@ -674,7 +671,7 @@ contract BindBox is ERC20, Ownable{
         address _owner = msg.sender;
         require(!_owner.isContract(), "the caller is contract");
         BoxInfo storage info = Boxinfo[_pid];
-        if (address(info.token) == address(0)){
+        if (address(info.token) == address(0)) {
             require(msg.value == info.amount, "mag.value error");
         } else {
             info.token.safeTransferFrom(msg.sender, address(this), info.amount);
@@ -687,26 +684,26 @@ contract BindBox is ERC20, Ownable{
         return _answer;
     }
 
-    function executeRusult(uint256 _index, BoxInfo storage info) internal returns(uint256){
+    function executeRusult(uint256 _index, BoxInfo storage info) internal returns(uint256) {
         uint256 _value;
         uint256 _result;
-        if(_index >= 0 && _index <= 39) {
+        if (_index >= 0 && _index <= 39) {
             _value = info.result1;
             _result = 1;
         }
-        if(_index >=40 && _index <= 64) {
+        if (_index >= 40 && _index <= 64) {
             _value = info.result2;
             _result = 2;
         }
-        if(_index >=65 && _index <= 84){
+        if (_index >= 65 && _index <= 84) {
             _value = info.result3;
             _result = 3;
         }
-        if(_index >=85 && _index <= 94){
+        if (_index >= 85 && _index <= 94) {
             _value = info.result4;
             _result = 4;
         }
-        if(_index >=95 && _index <= 99){
+        if (_index >= 95 && _index <= 99) {
             _value = info.result5;
             _result = 5;
         }

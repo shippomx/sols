@@ -441,7 +441,12 @@ contract Ownable is Context {
 contract MAMBAPool is Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
-    
+
+    mapping(address =>bool) public tokenState;
+    mapping(address => uint256) public depositAmount;
+
+    mapping(address =>uint256[]) public userid;
+    mapping(uint256 => uint256) public userindex;
 
     struct UserInfo { 
         uint256 amount;  //抵押金额
@@ -477,20 +482,17 @@ contract MAMBAPool is Ownable {
         _;
     }
 
-    function getpool() view public returns(PoolInfo[] memory){
+    function getpool() view public returns(PoolInfo[] memory) {
         return poolinfo;
     }
 
 
     //添加pool池
-    mapping(address =>bool) public tokenState;
-    mapping(address => uint256) public depositAmount;
-
-    function setMambaPool(uint256 _pid, uint256 _rewardPertime,uint256 _endtime) public onlyOwner validatePool(_pid){
+    function setMambaPool(uint256 _pid, uint256 _rewardPertime,uint256 _endtime) public onlyOwner validatePool(_pid) {
         PoolInfo storage pool = poolinfo[_pid];
         updatePool(_pid);
         pool.rewardPertime = _rewardPertime;
-        if (block.timestamp <= pool.endtime && _endtime >pool.endtime ){
+        if (block.timestamp <= pool.endtime && _endtime >pool.endtime ) {
             pool.endtime = _endtime;
         }
 
@@ -508,12 +510,11 @@ contract MAMBAPool is Ownable {
             totalStake: 0,
             name: _name
         }));
-        if (!tokenState[address(_token)]){
+        if (!tokenState[address(_token)]) {
             tokenState[address(_token)] =true;
         }
 
     }
-  
     
     function getMultiplier(PoolInfo storage pool) internal view returns (uint256) {
         uint256 from = pool.lastRewardtime;
@@ -533,7 +534,6 @@ contract MAMBAPool is Ownable {
     }
 
     function updatePool(uint256 _pid) public validatePool(_pid) {
-        
         PoolInfo storage pool = poolinfo[_pid];
         if (block.timestamp <= pool.lastRewardtime || pool.lastRewardtime > pool.endtime) { 
             return;
@@ -568,9 +568,7 @@ contract MAMBAPool is Ownable {
     }
 
     //抵押
-    mapping(address =>uint256[]) public userid;
-    mapping(uint256 => uint256) public userindex;
-    function deposit(uint256 _pid, uint256 _amount) public payable validatePool(_pid){
+    function deposit(uint256 _pid, uint256 _amount) public payable validatePool(_pid) {
         PoolInfo storage pool = poolinfo[_pid];
         UserInfo storage user = users[_pid][msg.sender];
         require(_amount > 0,"the amount equal to 0" );
@@ -579,7 +577,7 @@ contract MAMBAPool is Ownable {
             uint256 rewardpending = user.amount.mul(pool.accPerShare).div(1e18).sub(user.rewardDebt);
             user.pending = user.pending.add(rewardpending);
         }
-        if (address(pool.token) ==address(0)){
+        if (address(pool.token) ==address(0)) {
             _amount  = msg.value;
         } else {
             pool.token.safeTransferFrom(_msgSender(), address(this), _amount);
@@ -594,7 +592,7 @@ contract MAMBAPool is Ownable {
 
 
     //提取抵押
-    function withdraw(uint256 _pid, uint256 _amount)  public validatePool(_pid){
+    function withdraw(uint256 _pid, uint256 _amount)  public validatePool(_pid) {
         PoolInfo storage pool = poolinfo[_pid];
         UserInfo storage user = users[_pid][msg.sender];
         require(user.amount >= _amount, "withdraw: not good");
@@ -606,7 +604,7 @@ contract MAMBAPool is Ownable {
         user.rewardDebt = user.amount.mul(pool.accPerShare).div(1e18);
         pool.totalStake = pool.totalStake.sub(_amount);
 
-        if (address(pool.token) ==address(0)){
+        if (address(pool.token) ==address(0)) {
             msg.sender.transfer(_amount);
         } else {
             pool.token.safeTransfer(msg.sender, _amount);
@@ -631,7 +629,7 @@ contract MAMBAPool is Ownable {
 
     function rerardTransfer(IERC20 _token, address _to, uint256 _amount) internal {
         uint256 Balance;
-        if (tokenState[address(_token)]){
+        if (tokenState[address(_token)]) {
              Balance = _token.balanceOf(address(this)).sub(depositAmount[address(_token)]);
         } else {
              Balance = _token.balanceOf(address(this));
