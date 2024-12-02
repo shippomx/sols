@@ -37,6 +37,7 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
  */
 contract ERC20 is Context, IERC20, IERC20Metadata {
     using SafeMath for uint256;
+
     mapping(address => uint256) private _balances;
 
     mapping(address => mapping(address => uint256)) private _allowances;
@@ -57,29 +58,23 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     event Organization(uint8 indexed organizationId, uint256 releaseAllTime);
     event ChangeOwner(address indexed oldOwner, address indexed newOwner);
     //1
-    uint256[5] orgOne = [0 * 10**18, 0, 30, 30, 100];
+
+    uint256[5] orgOne = [0 * 10 ** 18, 0, 30, 30, 100];
     //2
-    uint256[5] orgTwo   = [0 * 10**18, 100, 6 * 30, 3 * 30, 250];
+    uint256[5] orgTwo = [0 * 10 ** 18, 100, 6 * 30, 3 * 30, 250];
     //IDO3
-    uint256[5] orgThree = [150000000 * 10**18, 0, 0 * 30, 3 * 30, 250];
+    uint256[5] orgThree = [150000000 * 10 ** 18, 0, 0 * 30, 3 * 30, 250];
     //team4
-    uint256[5] orgFour = [150000000 * 10**18, 0, 12 * 30, 3 * 30, 125];
+    uint256[5] orgFour = [150000000 * 10 ** 18, 0, 12 * 30, 3 * 30, 125];
     //社区分红5
-    uint256[5] orgFive = [300000000 * 10**18, 0, 12 * 30, 3 * 30, 125];
+    uint256[5] orgFive = [300000000 * 10 ** 18, 0, 12 * 30, 3 * 30, 125];
     //玩家奖励6，流动
-    uint256[5] orgSix = [1800000000 * 10**18, 1000, 0, 0, 0];
+    uint256[5] orgSix = [1800000000 * 10 ** 18, 1000, 0, 0, 0];
     //平台发展和生态基金7，流动
-    uint256[5] orgSeven = [600000000 * 10**18, 1000, 0, 0, 0];
-    uint256[5][7] orgRecords = [
-        orgOne,
-        orgTwo,
-        orgThree,
-        orgFour,
-        orgFive,
-        orgSix,
-        orgSeven
-    ];
+    uint256[5] orgSeven = [600000000 * 10 ** 18, 1000, 0, 0, 0];
+    uint256[5][7] orgRecords = [orgOne, orgTwo, orgThree, orgFour, orgFive, orgSix, orgSeven];
     //机构具体信息
+
     struct OrgRecord {
         //机构总发放量
         uint256 orgTotal;
@@ -87,6 +82,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         uint256 orgBalance;
     }
     //钱包锁仓具体信息
+
     struct WalletRecord {
         //钱包锁仓总数
         uint256 lockTotal;
@@ -176,13 +172,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     /**
      * @dev See {IERC20-balanceOf}.
      */
-    function balanceOf(address account)
-        public
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function balanceOf(address account) public view virtual override returns (uint256) {
         return _balances[account];
     }
 
@@ -194,12 +184,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      * - `to` cannot be the zero address.
      * - the caller must have a balance of at least `amount`.
      */
-    function transfer(address to, uint256 amount)
-        public
-        virtual
-        override
-        returns (bool)
-    {
+    function transfer(address to, uint256 amount) public virtual override returns (bool) {
         address owner = _msgSender();
         _transfer(owner, to, amount);
         return true;
@@ -208,13 +193,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     /**
      * @dev See {IERC20-allowance}.
      */
-    function allowance(address owner, address spender)
-        public
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function allowance(address owner, address spender) public view virtual override returns (uint256) {
         return _allowances[owner][spender];
     }
 
@@ -228,12 +207,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      *
      * - `spender` cannot be the zero address.
      */
-    function approve(address spender, uint256 amount)
-        public
-        virtual
-        override
-        returns (bool)
-    {
+    function approve(address spender, uint256 amount) public virtual override returns (bool) {
         address owner = _msgSender();
         _approve(owner, spender, amount);
         return true;
@@ -255,11 +229,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      * - the caller must have allowance for ``from``'s tokens of at least
      * `amount`.
      */
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) public virtual override returns (bool) {
+    function transferFrom(address from, address to, uint256 amount) public virtual override returns (bool) {
         address spender = _msgSender();
         _spendAllowance(from, spender, amount);
         _transfer(from, to, amount);
@@ -278,11 +248,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      *
      * - `spender` cannot be the zero address.
      */
-    function increaseAllowance(address spender, uint256 addedValue)
-        public
-        virtual
-        returns (bool)
-    {
+    function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool) {
         address owner = _msgSender();
         _approve(owner, spender, allowance(owner, spender) + addedValue);
         return true;
@@ -302,17 +268,10 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      * - `spender` must have allowance for the caller of at least
      * `subtractedValue`.
      */
-    function decreaseAllowance(address spender, uint256 subtractedValue)
-        public
-        virtual
-        returns (bool)
-    {
+    function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool) {
         address owner = _msgSender();
         uint256 currentAllowance = allowance(owner, spender);
-        require(
-            currentAllowance >= subtractedValue,
-            "ERC20: decreased allowance below zero"
-        );
+        require(currentAllowance >= subtractedValue, "ERC20: decreased allowance below zero");
         unchecked {
             _approve(owner, spender, currentAllowance - subtractedValue);
         }
@@ -338,12 +297,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     }
 
     //机构下的钱包
-    function wallets(uint8 index)
-        external
-        view
-        onlyOwner
-        returns (address[] memory)
-    {
+    function wallets(uint8 index) external view onlyOwner returns (address[] memory) {
         return orgWallet[index];
     }
 
@@ -371,12 +325,11 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         //遍历已存在的所有数据，并开始分发
         for (uint8 i = 0; i < 5; i++) {
             uint256 _releaseAllTime;
-            (_releaseAllTime, , , , ) = _releaseAll(orgRecords[i]);
+            (_releaseAllTime,,,,) = _releaseAll(orgRecords[i]);
             uint8 y = i + 1;
             for (uint8 x = 0; x < orgWallet[y].length; x++) {
                 if (orgWallet[y].length != 0) {
-                    walletRecords[orgWallet[y][x]]
-                        .releaseAllTime = _releaseAllTime;
+                    walletRecords[orgWallet[y][x]].releaseAllTime = _releaseAllTime;
                     _releaseToken(orgWallet[y][x], true);
                 }
             }
@@ -384,21 +337,20 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     }
 
     /**
-     添加管理机构及其对应token数量
-    _organizationId:机构id
-    _walletArray：对应机构的钱包地址数组
-    _amountArray：对应机构的钱包地址token数量
-    _firstUnlockPre：初始解锁千分比（默认千分比）
-    _releaseInterval:初始释放间隔时间（day）
-    _intervalTime:初始释放间隔时间之后每次释放的间隔时间（day）
-    _secondUnlockPre: 以后每次释放的千分比（默认千分比）
-    所有机构之间的钱包不能重复
+     * 添加管理机构及其对应token数量
+     * _organizationId:机构id
+     * _walletArray：对应机构的钱包地址数组
+     * _amountArray：对应机构的钱包地址token数量
+     * _firstUnlockPre：初始解锁千分比（默认千分比）
+     * _releaseInterval:初始释放间隔时间（day）
+     * _intervalTime:初始释放间隔时间之后每次释放的间隔时间（day）
+     * _secondUnlockPre: 以后每次释放的千分比（默认千分比）
+     * 所有机构之间的钱包不能重复
      */
-    function setOrganization(
-        uint8 _organizationId,
-        address[] memory _walletArray,
-        uint256[] memory _amountArray
-    ) external onlyOwner {
+    function setOrganization(uint8 _organizationId, address[] memory _walletArray, uint256[] memory _amountArray)
+        external
+        onlyOwner
+    {
         require(_organizationId != 0, "orgid is zero");
         require(_walletArray.length == _amountArray.length, "length error");
         uint8 organizationId = _organizationId - 1;
@@ -417,13 +369,8 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         uint256 _firstUnlockPre;
         uint256 _secondUnlockPre;
 
-        (
-            _releaseAllTime,
-            _releaseIntervalValue,
-            _intervalTimeValue,
-            _firstUnlockPre,
-            _secondUnlockPre
-        ) = _releaseAll(orgRecords[organizationId]);
+        (_releaseAllTime, _releaseIntervalValue, _intervalTimeValue, _firstUnlockPre, _secondUnlockPre) =
+            _releaseAll(orgRecords[organizationId]);
 
         for (uint256 i = 0; i < _walletArray.length; i++) {
             orgWallet[_organizationId].push(_walletArray[i]);
@@ -447,16 +394,12 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     function _releaseToken(address account, bool isSetTime) private {
         WalletRecord storage walletRecorde = walletRecords[account];
         uint8 _organizationId = walletRecorde.index;
-        if (
-            _organizationId == 0 || walletRecords[account].lockBalanceNum == 0
-        ) {
+        if (_organizationId == 0 || walletRecords[account].lockBalanceNum == 0) {
             return;
         }
         uint256 nowTime = block.timestamp;
 
-        if (
-            _organizationId != 6 && _organizationId != 7 && _organizationId != 0
-        ) {
+        if (_organizationId != 6 && _organizationId != 7 && _organizationId != 0) {
             require(_startTime != 0, "no start time");
             //如果是设置时间，那么设置的时间必须大于当前时间
             if (isSetTime) {
@@ -474,11 +417,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     }
 
     //查询剩余锁仓量
-    function _releaseTokenSearch(address account)
-        private
-        view
-        returns (uint256)
-    {
+    function _releaseTokenSearch(address account) private view returns (uint256) {
         WalletRecord storage walletRecorde = walletRecords[account];
         uint8 _organizationId = walletRecorde.index;
         if (_organizationId == 0 || walletRecorde.lockBalanceNum == 0) {
@@ -488,11 +427,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         uint256 nowTime = block.timestamp;
         uint256 lockTotalValue = walletRecorde.lockTotal;
 
-        if (
-            _organizationId != 6 &&
-            _organizationId != 7 &&
-            (_startTime == 0 || nowTime < _startTime)
-        ) {
+        if (_organizationId != 6 && _organizationId != 7 && (_startTime == 0 || nowTime < _startTime)) {
             return lockTotalValue;
         }
 
@@ -513,21 +448,13 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      * - `to` cannot be the zero address.
      * - `from` must have a balance of at least `amount`.
      */
-    function _transfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual {
+    function _transfer(address from, address to, uint256 amount) internal virtual {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
 
         //部署合约的地址只能转给机构下的钱包,且只能转一次
         if (from == _owner) {
-            require(
-                walletRecords[to].index != 0 &&
-                    walletRecords[to].lastRelease == 0,
-                "can not tx"
-            );
+            require(walletRecords[to].index != 0 && walletRecords[to].lastRelease == 0, "can not tx");
         }
         _releaseToken(from, false);
 
@@ -537,10 +464,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
 
         _beforeTokenTransfer(from, to, amount);
 
-        require(
-            fromBalance >= amount,
-            "ERC20: transfer amount exceeds balance"
-        );
+        require(fromBalance >= amount, "ERC20: transfer amount exceeds balance");
 
         unchecked {
             _balances[from] = fromBalance - amount;
@@ -552,7 +476,8 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         _afterTokenTransfer(from, to, amount);
     }
 
-    /** @dev Creates `amount` tokens and assigns them to `account`, increasing
+    /**
+     * @dev Creates `amount` tokens and assigns them to `account`, increasing
      * the total supply.
      *
      * Emits a {Transfer} event with `from` set to the zero address.
@@ -614,11 +539,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      * - `owner` cannot be the zero address.
      * - `spender` cannot be the zero address.
      */
-    function _approve(
-        address owner,
-        address spender,
-        uint256 amount
-    ) internal virtual {
+    function _approve(address owner, address spender, uint256 amount) internal virtual {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
 
@@ -634,17 +555,10 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      *
      * Might emit an {Approval} event.
      */
-    function _spendAllowance(
-        address owner,
-        address spender,
-        uint256 amount
-    ) internal virtual {
+    function _spendAllowance(address owner, address spender, uint256 amount) internal virtual {
         uint256 currentAllowance = allowance(owner, spender);
         if (currentAllowance != type(uint256).max) {
-            require(
-                currentAllowance >= amount,
-                "ERC20: insufficient allowance"
-            );
+            require(currentAllowance >= amount, "ERC20: insufficient allowance");
             unchecked {
                 _approve(owner, spender, currentAllowance - amount);
             }
@@ -665,11 +579,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      *
      * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
      */
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual {}
+    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual {}
 
     /**
      * @dev Hook that is called after any transfer of tokens. This includes
@@ -685,23 +595,13 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      *
      * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
      */
-    function _afterTokenTransfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual {}
+    function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual {}
 
     //计算全部释放完成的时间
     function _releaseAll(uint256[5] storage oneOrgRecordMsg)
         private
         view
-        returns (
-            uint256,
-            uint256,
-            uint256,
-            uint256,
-            uint256
-        )
+        returns (uint256, uint256, uint256, uint256, uint256)
     {
         uint256 _firstUnlockPre = oneOrgRecordMsg[1];
         //初始释放间隔
@@ -711,53 +611,32 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         uint256 _secondUnlockPre = oneOrgRecordMsg[4];
 
         if (_secondUnlockPre == 0) {
-            return (
-                _startTime,
-                _releaseInterval,
-                _intervalTime,
-                _firstUnlockPre,
-                _secondUnlockPre
-            );
+            return (_startTime, _releaseInterval, _intervalTime, _firstUnlockPre, _secondUnlockPre);
         }
         uint256 baseNum = 1000;
         uint256 firstBalance = baseNum.sub(_firstUnlockPre);
         //第二次发放的总次数
-        uint256 times = (firstBalance.sub(firstBalance.mod(_secondUnlockPre)))
-            .div(_secondUnlockPre);
-        uint256 _releaseAllTimes = _startTime.add(_releaseInterval).add(
-            times.mul(_intervalTime)
-        );
-        return (
-            _releaseAllTimes,
-            _releaseInterval,
-            _intervalTime,
-            _firstUnlockPre,
-            _secondUnlockPre
-        );
+        uint256 times = (firstBalance.sub(firstBalance.mod(_secondUnlockPre))).div(_secondUnlockPre);
+        uint256 _releaseAllTimes = _startTime.add(_releaseInterval).add(times.mul(_intervalTime));
+        return (_releaseAllTimes, _releaseInterval, _intervalTime, _firstUnlockPre, _secondUnlockPre);
     }
 
     //计算钱包的锁定余额
-    function _lockBalanceNum(
-        WalletRecord storage walletRecorde,
-        uint256 nowTime
-    ) private view returns (uint256) {
-        /**因为释放是根据千分比，所以统计其中一个即可
-        //判断是否仅在初始释放时间内
-        判断是否是初次释放
-        */
+    function _lockBalanceNum(WalletRecord storage walletRecorde, uint256 nowTime) private view returns (uint256) {
+        /**
+         * 因为释放是根据千分比，所以统计其中一个即可
+         *     //判断是否仅在初始释放时间内
+         *     判断是否是初次释放
+         */
         uint256 lastTime;
         uint256 duration;
         //初次释放(证明还有初始释放)
         if (walletRecorde.lastRelease == 0) {
             //在初始间隔时间内
             if (walletRecorde.releaseInterval.add(_startTime) > nowTime) {
-                return
-                    walletRecorde.lockBalanceNum.sub(
-                        walletRecorde
-                            .lockTotal
-                            .mul(walletRecorde.firstUnlockPre)
-                            .div(1000)
-                    );
+                return walletRecorde.lockBalanceNum.sub(
+                    walletRecorde.lockTotal.mul(walletRecorde.firstUnlockPre).div(1000)
+                );
             } else {
                 //释放完全部
                 if (nowTime > walletRecorde.releaseAllTime) {
@@ -766,21 +645,14 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
                     //在第二次间隔时间
                     lastTime = _startTime.add(walletRecorde.releaseInterval);
                     duration = nowTime.sub(lastTime);
-                    uint256 times = (
-                        duration.sub(duration.mod(walletRecorde.intervalTime))
-                    ).div(walletRecorde.intervalTime).add(1);
+                    uint256 times =
+                        (duration.sub(duration.mod(walletRecorde.intervalTime))).div(walletRecorde.intervalTime).add(1);
 
-                    return
-                        walletRecorde.lockBalanceNum.sub(
-                            walletRecorde
-                                .lockTotal
-                                .mul(
-                                    walletRecorde.firstUnlockPre.add(
-                                        times.mul(walletRecorde.secondUnlockPre)
-                                    )
-                                )
-                                .div(1000)
-                        );
+                    return walletRecorde.lockBalanceNum.sub(
+                        walletRecorde.lockTotal.mul(
+                            walletRecorde.firstUnlockPre.add(times.mul(walletRecorde.secondUnlockPre))
+                        ).div(1000)
+                    );
                 }
             }
         } else {
@@ -790,19 +662,12 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
             } else {
                 //在第二次间隔时间
                 duration = nowTime.sub(walletRecorde.lastRelease);
-                uint256 times = (
-                    (duration.sub(duration.mod(walletRecorde.intervalTime)))
-                ).div(walletRecorde.intervalTime).add(1);
+                uint256 times =
+                    ((duration.sub(duration.mod(walletRecorde.intervalTime)))).div(walletRecorde.intervalTime).add(1);
 
-                return
-                    walletRecorde.lockBalanceNum.sub(
-                        times.mul(
-                            walletRecorde
-                                .lockTotal
-                                .mul(walletRecorde.secondUnlockPre)
-                                .div(1000)
-                        )
-                    );
+                return walletRecorde.lockBalanceNum.sub(
+                    times.mul(walletRecorde.lockTotal.mul(walletRecorde.secondUnlockPre).div(1000))
+                );
             }
         }
     }

@@ -1,4 +1,3 @@
-
 pragma solidity 0.5.12;
 pragma experimental ABIEncoderV2;
 /**
@@ -14,7 +13,6 @@ pragma experimental ABIEncoderV2;
  * Using this library instead of the unchecked operations eliminates an entire
  * class of bugs, so it's recommended to use it always.
  */
-
 
 library SafeMath {
     /**
@@ -160,11 +158,11 @@ library SafeMath {
 }
 
 contract Context {
-    function _msgSender() internal view  returns (address payable) {
+    function _msgSender() internal view returns (address payable) {
         return msg.sender;
     }
 
-    function _msgData() internal view  returns (bytes memory) {
+    function _msgData() internal view returns (bytes memory) {
         this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
         return msg.data;
     }
@@ -182,7 +180,7 @@ library Address {
      * It is unsafe to assume that an address for which this function returns
      * false is an externally-owned account (EOA) and not a contract.
      *
-     * Among others, `isContract` will return false for the following 
+     * Among others, `isContract` will return false for the following
      * types of addresses:
      *
      *  - an externally-owned account
@@ -198,7 +196,9 @@ library Address {
         bytes32 codehash;
         bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
         // solhint-disable-next-line no-inline-assembly
-        assembly { codehash := extcodehash(account) }
+        assembly {
+            codehash := extcodehash(account)
+        }
         return (codehash != accountHash && codehash != 0x0);
     }
 
@@ -234,7 +234,7 @@ library Address {
         require(address(this).balance >= amount, "Address: insufficient balance");
 
         // solhint-disable-next-line avoid-call-value
-        (bool success, ) = recipient.call.value(amount)("");
+        (bool success,) = recipient.call.value(amount)("");
         require(success, "Address: unable to send value, recipient may have reverted");
     }
 }
@@ -312,8 +312,6 @@ interface IERC20 {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-
-
 /**
  * @title SafeERC20
  * @dev Wrappers around ERC20 operations that throw on failure (when the token
@@ -340,7 +338,8 @@ library SafeERC20 {
         // or when resetting it to zero. To increase and decrease it, use
         // 'safeIncreaseAllowance' and 'safeDecreaseAllowance'
         // solhint-disable-next-line max-line-length
-        require((value == 0) || (token.allowance(address(this), spender) == 0),
+        require(
+            (value == 0) || (token.allowance(address(this), spender) == 0),
             "SafeERC20: approve from non-zero to non-zero allowance"
         );
         callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, value));
@@ -352,7 +351,8 @@ library SafeERC20 {
     }
 
     function safeDecreaseAllowance(IERC20 token, address spender, uint256 value) internal {
-        uint256 newAllowance = token.allowance(address(this), spender).sub(value, "SafeERC20: decreased allowance below zero");
+        uint256 newAllowance =
+            token.allowance(address(this), spender).sub(value, "SafeERC20: decreased allowance below zero");
         callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, newAllowance));
     }
 
@@ -377,7 +377,8 @@ library SafeERC20 {
         (bool success, bytes memory returndata) = address(token).call(data);
         require(success, "SafeERC20: low-level call failed");
 
-        if (returndata.length > 0) { // Return data is optional
+        if (returndata.length > 0) {
+            // Return data is optional
             // solhint-disable-next-line max-line-length
             require(abi.decode(returndata, (bool)), "SafeERC20: ERC20 operation did not succeed");
         }
@@ -392,7 +393,7 @@ contract Ownable is Context {
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
      */
-    constructor () internal {
+    constructor() internal {
         address msgSender = _msgSender();
         _owner = msgSender;
         emit OwnershipTransferred(address(0), msgSender);
@@ -420,7 +421,7 @@ contract Ownable is Context {
      * NOTE: Renouncing ownership will leave the contract without an owner,
      * thereby removing any functionality that is only available to the owner.
      */
-    function renounceOwnership() public  onlyOwner {
+    function renounceOwnership() public onlyOwner {
         emit OwnershipTransferred(_owner, address(0));
         _owner = address(0);
     }
@@ -429,27 +430,25 @@ contract Ownable is Context {
      * @dev Transfers ownership of the contract to a new account (`newOwner`).
      * Can only be called by the current owner.
      */
-    function transferOwnership(address newOwner) public  onlyOwner {
+    function transferOwnership(address newOwner) public onlyOwner {
         require(newOwner != address(0), "Ownable: new owner is the zero address");
         emit OwnershipTransferred(_owner, newOwner);
         _owner = newOwner;
     }
 }
 
-
-
 contract MAMBAPool is Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    mapping(address =>bool) public tokenState;
+    mapping(address => bool) public tokenState;
     mapping(address => uint256) public depositAmount;
 
-    mapping(address =>uint256[]) public userid;
+    mapping(address => uint256[]) public userid;
     mapping(uint256 => uint256) public userindex;
 
-    struct UserInfo { 
-        uint256 amount;  //抵押金额
+    struct UserInfo {
+        uint256 amount; //抵押金额
         uint256 depositerewarded; //已领取的抵押奖励
         uint256 rewardDebt;
         uint256 pending;
@@ -469,53 +468,59 @@ contract MAMBAPool is Ownable {
 
     PoolInfo[] public poolinfo;
 
-    mapping (uint256 => mapping (address => UserInfo)) public users;
+    mapping(uint256 => mapping(address => UserInfo)) public users;
 
     event Deposit(address indexed user, uint256 _pid, uint256 amount);
     event Withdraw(address indexed user, uint256 _pid, uint256 amount);
     event ReclaimStakingReward(address user, uint256 amount);
     event Set(uint256 pid, uint256 allocPoint, bool withUpdate);
-    
 
     modifier validatePool(uint256 _pid) {
         require(_pid < poolinfo.length, " pool exists?");
         _;
     }
 
-    function getpool() view public returns(PoolInfo[] memory) {
+    function getpool() public view returns (PoolInfo[] memory) {
         return poolinfo;
     }
 
-
     //添加pool池
-    function setMambaPool(uint256 _pid, uint256 _rewardPertime,uint256 _endtime) public onlyOwner validatePool(_pid) {
+    function setMambaPool(uint256 _pid, uint256 _rewardPertime, uint256 _endtime) public onlyOwner validatePool(_pid) {
         PoolInfo storage pool = poolinfo[_pid];
         updatePool(_pid);
         pool.rewardPertime = _rewardPertime;
-        if (block.timestamp <= pool.endtime && _endtime >pool.endtime ) {
+        if (block.timestamp <= pool.endtime && _endtime > pool.endtime) {
             pool.endtime = _endtime;
         }
-
     }
-    function addPool(IERC20 _token, IERC20 _rewardtoken, uint256 _starttime, uint256 _endtime, uint256 _rewardPertime,string memory _name) public onlyOwner {
+
+    function addPool(
+        IERC20 _token,
+        IERC20 _rewardtoken,
+        uint256 _starttime,
+        uint256 _endtime,
+        uint256 _rewardPertime,
+        string memory _name
+    ) public onlyOwner {
         uint256 lastRewardtime = block.timestamp > _starttime ? block.timestamp : _starttime;
-        poolinfo.push(PoolInfo({
-            token: _token,
-            rewaredtoken:_rewardtoken,
-            starttime: _starttime,
-            endtime: _endtime,
-            rewardPertime: _rewardPertime,
-            lastRewardtime: lastRewardtime,
-            accPerShare: 0,
-            totalStake: 0,
-            name: _name
-        }));
+        poolinfo.push(
+            PoolInfo({
+                token: _token,
+                rewaredtoken: _rewardtoken,
+                starttime: _starttime,
+                endtime: _endtime,
+                rewardPertime: _rewardPertime,
+                lastRewardtime: lastRewardtime,
+                accPerShare: 0,
+                totalStake: 0,
+                name: _name
+            })
+        );
         if (!tokenState[address(_token)]) {
-            tokenState[address(_token)] =true;
+            tokenState[address(_token)] = true;
         }
-
     }
-    
+
     function getMultiplier(PoolInfo storage pool) internal view returns (uint256) {
         uint256 from = pool.lastRewardtime;
         uint256 to = block.timestamp < pool.endtime ? block.timestamp : pool.endtime;
@@ -523,7 +528,6 @@ contract MAMBAPool is Ownable {
             return 0;
         }
         return to.sub(from);
-              
     }
 
     function massUpdatePools() public {
@@ -535,7 +539,7 @@ contract MAMBAPool is Ownable {
 
     function updatePool(uint256 _pid) public validatePool(_pid) {
         PoolInfo storage pool = poolinfo[_pid];
-        if (block.timestamp <= pool.lastRewardtime || pool.lastRewardtime > pool.endtime) { 
+        if (block.timestamp <= pool.lastRewardtime || pool.lastRewardtime > pool.endtime) {
             return;
         }
 
@@ -551,8 +555,7 @@ contract MAMBAPool is Ownable {
         pool.lastRewardtime = block.timestamp < pool.endtime ? block.timestamp : pool.endtime;
     }
 
-
-    function pending(uint256 _pid, address _user) public view validatePool(_pid) returns (uint256)  {
+    function pending(uint256 _pid, address _user) public view validatePool(_pid) returns (uint256) {
         PoolInfo storage pool = poolinfo[_pid];
         UserInfo storage user = users[_pid][_user];
         uint256 accPerShare = pool.accPerShare;
@@ -562,7 +565,6 @@ contract MAMBAPool is Ownable {
             uint256 multiplier = getMultiplier(pool);
             uint256 Reward = multiplier.mul(pool.rewardPertime);
             accPerShare = accPerShare.add(Reward.mul(1e18).div(totalStake));
-        
         }
         return user.pending.add(user.amount.mul(accPerShare).div(1e18)).sub(user.rewardDebt);
     }
@@ -571,14 +573,14 @@ contract MAMBAPool is Ownable {
     function deposit(uint256 _pid, uint256 _amount) public payable validatePool(_pid) {
         PoolInfo storage pool = poolinfo[_pid];
         UserInfo storage user = users[_pid][msg.sender];
-        require(_amount > 0,"the amount equal to 0" );
+        require(_amount > 0, "the amount equal to 0");
         updatePool(_pid);
-        if (user.amount > 0) { 
+        if (user.amount > 0) {
             uint256 rewardpending = user.amount.mul(pool.accPerShare).div(1e18).sub(user.rewardDebt);
             user.pending = user.pending.add(rewardpending);
         }
-        if (address(pool.token) ==address(0)) {
-            _amount  = msg.value;
+        if (address(pool.token) == address(0)) {
+            _amount = msg.value;
         } else {
             pool.token.safeTransferFrom(_msgSender(), address(this), _amount);
         }
@@ -590,9 +592,8 @@ contract MAMBAPool is Ownable {
         emit Deposit(msg.sender, _pid, _amount);
     }
 
-
     //提取抵押
-    function withdraw(uint256 _pid, uint256 _amount)  public validatePool(_pid) {
+    function withdraw(uint256 _pid, uint256 _amount) public validatePool(_pid) {
         PoolInfo storage pool = poolinfo[_pid];
         UserInfo storage user = users[_pid][msg.sender];
         require(user.amount >= _amount, "withdraw: not good");
@@ -604,7 +605,7 @@ contract MAMBAPool is Ownable {
         user.rewardDebt = user.amount.mul(pool.accPerShare).div(1e18);
         pool.totalStake = pool.totalStake.sub(_amount);
 
-        if (address(pool.token) ==address(0)) {
+        if (address(pool.token) == address(0)) {
             msg.sender.transfer(_amount);
         } else {
             pool.token.safeTransfer(msg.sender, _amount);
@@ -619,7 +620,7 @@ contract MAMBAPool is Ownable {
         updatePool(_pid);
         uint256 rewardpending = user.pending.add(user.amount.mul(pool.accPerShare).div(1e18).sub(user.rewardDebt));
         if (rewardpending > 0) {
-            rerardTransfer(pool.rewaredtoken,msg.sender, rewardpending);
+            rerardTransfer(pool.rewaredtoken, msg.sender, rewardpending);
         }
         user.pending = 0;
         user.depositerewarded = user.depositerewarded.add(rewardpending);
@@ -630,13 +631,12 @@ contract MAMBAPool is Ownable {
     function rerardTransfer(IERC20 _token, address _to, uint256 _amount) internal {
         uint256 Balance;
         if (tokenState[address(_token)]) {
-             Balance = _token.balanceOf(address(this)).sub(depositAmount[address(_token)]);
+            Balance = _token.balanceOf(address(this)).sub(depositAmount[address(_token)]);
         } else {
-             Balance = _token.balanceOf(address(this));
+            Balance = _token.balanceOf(address(this));
         }
 
         require(Balance >= _amount, "no enough token");
         _token.transfer(_to, _amount);
     }
-
 }

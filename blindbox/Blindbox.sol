@@ -14,6 +14,7 @@ pragma solidity ^0.6.0;
  * Using this library instead of the unchecked operations eliminates an entire
  * class of bugs, so it's recommended to use it always.
  */
+
 library SafeMath {
     /**
      * @dev Returns the addition of two unsigned integers, reverting on
@@ -163,12 +164,11 @@ library SafeMath {
 contract Context {
     // Empty internal constructor, to prevent people from mistakenly deploying
     // an instance of this contract, which should be used via inheritance.
-    constructor () internal { }
+    constructor() internal {}
 
     function _msgSender() internal view virtual returns (address payable) {
         return msg.sender;
     }
-
 
     function _msgData() internal view virtual returns (bytes memory) {
         this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
@@ -178,6 +178,7 @@ contract Context {
 /**
  * @dev Collection of functions related to the address type
  */
+
 library Address {
     /**
      * @dev Returns true if `account` is a contract.
@@ -203,7 +204,9 @@ library Address {
         bytes32 codehash;
         bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
         // solhint-disable-next-line no-inline-assembly
-        assembly { codehash := extcodehash(account) }
+        assembly {
+            codehash := extcodehash(account)
+        }
         return (codehash != accountHash && codehash != 0x0);
     }
 
@@ -227,7 +230,7 @@ library Address {
         require(address(this).balance >= amount, "Address: insufficient balance");
 
         // solhint-disable-next-line avoid-low-level-calls, avoid-call-value
-        (bool success, ) = recipient.call{ value: amount }("");
+        (bool success,) = recipient.call{value: amount}("");
         require(success, "Address: unable to send value, recipient may have reverted");
     }
 }
@@ -249,7 +252,8 @@ library SafeERC20 {
         // or when resetting it to zero. To increase and decrease it, use
         // 'safeIncreaseAllowance' and 'safeDecreaseAllowance'
         // solhint-disable-next-line max-line-length
-        require((value == 0) || (token.allowance(address(this), spender) == 0),
+        require(
+            (value == 0) || (token.allowance(address(this), spender) == 0),
             "SafeERC20: approve from non-zero to non-zero allowance"
         );
         _callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, value));
@@ -261,7 +265,8 @@ library SafeERC20 {
     }
 
     function safeDecreaseAllowance(IERC20 token, address spender, uint256 value) internal {
-        uint256 newAllowance = token.allowance(address(this), spender).sub(value, "SafeERC20: decreased allowance below zero");
+        uint256 newAllowance =
+            token.allowance(address(this), spender).sub(value, "SafeERC20: decreased allowance below zero");
         _callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, newAllowance));
     }
 
@@ -286,7 +291,8 @@ library SafeERC20 {
         (bool success, bytes memory returndata) = address(token).call(data);
         require(success, "SafeERC20: low-level call failed");
 
-        if (returndata.length > 0) { // Return data is optional
+        if (returndata.length > 0) {
+            // Return data is optional
             // solhint-disable-next-line max-line-length
             require(abi.decode(returndata, (bool)), "SafeERC20: ERC20 operation did not succeed");
         }
@@ -295,6 +301,7 @@ library SafeERC20 {
 /**
  * @dev Interface of the ERC20 standard as defined in the EIP.
  */
+
 interface IERC20 {
     /**
      * @dev Returns the amount of tokens in existence.
@@ -366,15 +373,13 @@ interface IERC20 {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-
 contract ERC20 is Context, IERC20 {
     using SafeMath for uint256;
 
-    mapping (address => uint256) internal _balances;
-    mapping (address => mapping (address => uint256)) internal _allowances;
+    mapping(address => uint256) internal _balances;
+    mapping(address => mapping(address => uint256)) internal _allowances;
 
     uint256 internal _totalSupply;
-
 
     /**
      * @dev See {IERC20-totalSupply}.
@@ -436,7 +441,11 @@ contract ERC20 is Context, IERC20 {
      */
     function transferFrom(address sender, address recipient, uint256 amount) public virtual override returns (bool) {
         _transfer(sender, recipient, amount);
-        _approve(sender, _msgSender(), _allowances[sender][_msgSender()].sub(amount, "ERC20: transfer amount exceeds allowance"));
+        _approve(
+            sender,
+            _msgSender(),
+            _allowances[sender][_msgSender()].sub(amount, "ERC20: transfer amount exceeds allowance")
+        );
         return true;
     }
 
@@ -472,7 +481,11 @@ contract ERC20 is Context, IERC20 {
      * `subtractedValue`.
      */
     function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool) {
-        _approve(_msgSender(), spender, _allowances[_msgSender()][spender].sub(subtractedValue, "ERC20: decreased allowance below zero"));
+        _approve(
+            _msgSender(),
+            spender,
+            _allowances[_msgSender()][spender].sub(subtractedValue, "ERC20: decreased allowance below zero")
+        );
         return true;
     }
 
@@ -499,7 +512,8 @@ contract ERC20 is Context, IERC20 {
         emit Transfer(sender, recipient, amount);
     }
 
-    /** @dev Creates `amount` tokens and assigns them to `account`, increasing
+    /**
+     * @dev Creates `amount` tokens and assigns them to `account`, increasing
      * the total supply.
      *
      * Emits a {Transfer} event with `from` set to the zero address.
@@ -553,12 +567,13 @@ contract ERC20 is Context, IERC20 {
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
     }
-
 }
+
 contract Ownable is Context {
     address internal _owner;
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
     constructor() public {
         _owner = msg.sender;
         emit OwnershipTransferred(address(0), msg.sender);
@@ -566,6 +581,7 @@ contract Ownable is Context {
     /**
      * @dev Returns the address of the current owner.
      */
+
     function owner() public view returns (address) {
         return _owner;
     }
@@ -603,14 +619,14 @@ contract Ownable is Context {
     }
 }
 
-
-contract BindBox is ERC20, Ownable{
+contract BindBox is ERC20, Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
     using Address for address;
 
     event ExecuteBox(address _user, uint256 _result);
     event AddPool(address _user, uint256 _index);
+
     struct BoxInfo {
         IERC20 token;
         IERC20 rewardToken;
@@ -622,16 +638,28 @@ contract BindBox is ERC20, Ownable{
         uint256 result5;
         uint256 participatePeople;
     }
+
     BoxInfo[] public Boxinfo;
 
     modifier validatePool(uint256 _pid) {
         require(_pid < Boxinfo.length, " Boxinfo exists?");
         _;
     }
-    function getBoxInfo() public view returns(BoxInfo[] memory) {
+
+    function getBoxInfo() public view returns (BoxInfo[] memory) {
         return Boxinfo;
     }
-    function setPoolInfo(uint256 _pid, IERC20 _rewardToken, uint256 _amount, uint256 _result1, uint256 _result2,  uint256 _result3, uint256 _result4, uint256 _result5) public onlyOwner{
+
+    function setPoolInfo(
+        uint256 _pid,
+        IERC20 _rewardToken,
+        uint256 _amount,
+        uint256 _result1,
+        uint256 _result2,
+        uint256 _result3,
+        uint256 _result4,
+        uint256 _result5
+    ) public onlyOwner {
         BoxInfo storage info = Boxinfo[_pid];
         info.rewardToken = _rewardToken;
         info.amount = _amount;
@@ -642,7 +670,7 @@ contract BindBox is ERC20, Ownable{
         info.result5 = _result5;
     }
 
-    function withdrawToken(address _token, address payable to) public onlyOwner{
+    function withdrawToken(address _token, address payable to) public onlyOwner {
         if (_token == address(0)) {
             to.transfer(address(this).balance);
         } else {
@@ -650,24 +678,34 @@ contract BindBox is ERC20, Ownable{
         }
     }
 
-    function addPool(IERC20 _token, IERC20 _rewardToken, uint256 _amount, uint256 _result1, uint256 _result2,  uint256 _result3, uint256 _result4, uint256 _result5) public onlyOwner {
-        Boxinfo.push(BoxInfo({
-            token: _token,
-            rewardToken: _rewardToken,
-            amount: _amount,
-            result1: _result1,
-            result2: _result2,
-            result3: _result3,
-            result4: _result4,
-            result5: _result5,
-            participatePeople: 0
-
-        }));
+    function addPool(
+        IERC20 _token,
+        IERC20 _rewardToken,
+        uint256 _amount,
+        uint256 _result1,
+        uint256 _result2,
+        uint256 _result3,
+        uint256 _result4,
+        uint256 _result5
+    ) public onlyOwner {
+        Boxinfo.push(
+            BoxInfo({
+                token: _token,
+                rewardToken: _rewardToken,
+                amount: _amount,
+                result1: _result1,
+                result2: _result2,
+                result3: _result3,
+                result4: _result4,
+                result5: _result5,
+                participatePeople: 0
+            })
+        );
         emit AddPool(msg.sender, Boxinfo.length.sub(1));
     }
 
     //盲盒抽奖ir
-    function executeBox(uint256 _pid) public payable returns(uint256) {
+    function executeBox(uint256 _pid) public payable returns (uint256) {
         address _owner = msg.sender;
         require(!_owner.isContract(), "the caller is contract");
         BoxInfo storage info = Boxinfo[_pid];
@@ -677,14 +715,15 @@ contract BindBox is ERC20, Ownable{
             info.token.safeTransferFrom(msg.sender, address(this), info.amount);
         }
 
-        uint256 index = uint256(keccak256(abi.encodePacked(blockhash(block.number), msg.sender, block.timestamp, _pid))).mod(100);
+        uint256 index =
+            uint256(keccak256(abi.encodePacked(blockhash(block.number), msg.sender, block.timestamp, _pid))).mod(100);
         uint256 _answer = executeRusult(index, info);
         info.participatePeople++;
         emit ExecuteBox(msg.sender, _answer);
         return _answer;
     }
 
-    function executeRusult(uint256 _index, BoxInfo storage info) internal returns(uint256) {
+    function executeRusult(uint256 _index, BoxInfo storage info) internal returns (uint256) {
         uint256 _value;
         uint256 _result;
         if (_index >= 0 && _index <= 39) {
@@ -710,9 +749,10 @@ contract BindBox is ERC20, Ownable{
         if (address(info.rewardToken) == address(0)) {
             payable(msg.sender).transfer(_value);
         } else {
-            IERC20(info.rewardToken).transfer(msg.sender, _value );
+            IERC20(info.rewardToken).transfer(msg.sender, _value);
         }
         return _result;
     }
+
     receive() external payable {}
 }
